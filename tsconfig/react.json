@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "display": "@zoldytech/eslint-config react (Vite)",
+  "display": "@zoldytech/javascript react (Vite)",
   "extends": "./base.json",
   "compilerOptions": {
     "jsx": "react-jsx",

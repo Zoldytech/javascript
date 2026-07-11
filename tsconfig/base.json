@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "display": "@zoldytech/eslint-config base",
+  "display": "@zoldytech/javascript base",
   "compilerOptions": {
     "strict": true,
     "strictNullChecks": true,

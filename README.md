@@ -1,4 +1,4 @@
-# @zoldytech/eslint-config
+# @zoldytech/javascript
 
 A general-purpose ESLint **house style**, built on [`@antfu/eslint-config`](https://github.com/antfu/eslint-config)
 and made **SonarQube-compatible**: local ESLint mirrors what the SonarQube gate flags, so you fix
@@ -29,7 +29,7 @@ Sonar issues before they reach CI. Four stack presets — **plain JS/TS**, **Rea
 Distributed via GitHub URL, pinned to a tag (no build step runs on install — raw ESM):
 
 ```bash
-npm i -D "github:zoldytech/eslint-config#v0.1.0"
+npm i -D "github:zoldytech/javascript#v0.1.0"
 ```
 
 ## Usage
@@ -40,7 +40,7 @@ config blocks as options:
 
 ```js
 // eslint.config.mjs — Next.js
-import { next } from '@zoldytech/eslint-config/eslint';
+import { next } from '@zoldytech/javascript/eslint';
 
 export default next({
   typeChecked: true,
@@ -50,23 +50,23 @@ export default next({
 
 ```js
 // NestJS (typeChecked defaults to true)
-import { nest } from '@zoldytech/eslint-config/eslint';
+import { nest } from '@zoldytech/javascript/eslint';
 export default nest({ tsconfigPath: 'tsconfig.json' });
 ```
 
 ```js
 // React + Vite
-import { react } from '@zoldytech/eslint-config/eslint';
+import { react } from '@zoldytech/javascript/eslint';
 export default react();
 ```
 
 ```js
 // plain JS/TS
-import { base } from '@zoldytech/eslint-config/eslint';
+import { base } from '@zoldytech/javascript/eslint';
 export default base();
 ```
 
-Subpaths also work directly: `@zoldytech/eslint-config/eslint/next`, `/eslint/base`, etc.
+Subpaths also work directly: `@zoldytech/javascript/eslint/next`, `/eslint/base`, etc.
 
 ### Options
 
@@ -91,7 +91,7 @@ keep the tsconfig's `include`/`exclude` in sync with what ESLint lints.
 Point Prettier at the shared config in `package.json`:
 
 ```json
-{ "prettier": "@zoldytech/eslint-config/prettier" }
+{ "prettier": "@zoldytech/javascript/prettier" }
 ```
 
 ESLint owns code quality; Prettier owns formatting. The presets set antfu `stylistic: false` and
@@ -103,7 +103,7 @@ Extend the matching base in `tsconfig.json`:
 
 ```json
 {
-  "extends": "@zoldytech/eslint-config/tsconfig/next.json",
+  "extends": "@zoldytech/javascript/tsconfig/next.json",
   "compilerOptions": { "paths": { "@/*": ["./src/*"] } },
   "include": ["src"]
 }

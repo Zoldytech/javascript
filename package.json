@@ -1,9 +1,9 @@
 {
-  "name": "@zoldytech/eslint-config",
+  "name": "@zoldytech/javascript",
   "type": "module",
   "version": "0.1.0",
   "private": true,
-  "description": "Shared SonarQube-equivalent ESLint flat-config guardrails for Next.js, NestJS, React+Vite, and plain JS/TS.",
+  "description": "Zoldytech's JavaScript/TypeScript standards: SonarQube-compatible ESLint presets (Next.js, NestJS, React+Vite, plain JS/TS) plus shared Prettier and tsconfig configs.",
   "license": "MIT",
   "prettier": "./prettier/prettierrc.json",
   "exports": {
