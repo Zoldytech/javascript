@@ -1,134 +1,119 @@
 # @zoldytech/eslint-config
 
-Shared **SonarQube-equivalent** ESLint flat-config guardrails for four stacks — **Next.js**,
-**NestJS**, **React + Vite**, and **plain JS/TS**. One package so every project imports the same
-bar instead of re-deriving it: the full `eslint-plugin-sonarjs` recommended set, cognitive
-complexity capped at 15, plus curated `unicorn`/core rules mapped to the SonarQube S-codes the
-sonarjs plugin doesn't ship (S7781, S7763, S6606, S7735, …), and a `unused-imports` de-dup layer.
+A general-purpose ESLint **house style**, built on [`@antfu/eslint-config`](https://github.com/antfu/eslint-config)
+and made **SonarQube-compatible**: local ESLint mirrors what the SonarQube gate flags, so you fix
+Sonar issues before they reach CI. Four stack presets — **plain JS/TS**, **React + Vite**,
+**Next.js**, **NestJS**.
 
-Also ships a shared Prettier config and TypeScript base configs.
+- **antfu foundation** — TypeScript, imports, `unicorn`, node, `jsonc`/`yaml`/`markdown`, sensible
+  modern defaults, one `--fix`.
+- **SonarQube layer on top** — the full `eslint-plugin-sonarjs` recommended set, cognitive complexity
+  capped at 15, plus `unicorn`/core rules mapped to the SonarQube S-codes sonarjs doesn't ship
+  (S7781, S7763, S6606, S7735, …). Appended after antfu so it wins on conflicts.
+- **Prettier owns formatting** (`stylistic: false` + `eslint-config-prettier`). Formatting is a
+  separable layer — swapping to another formatter later doesn't touch the rules.
+- Also ships a shared Prettier config and TypeScript base configs.
 
 ## Requirements
 
-- **Node** ≥ 20.10
-- **ESLint ≥ 9.38** — this line targets ESLint **9** today. The config is already ESLint-10-ready;
-  a 10-targeting release follows once `eslint-plugin-react` / `eslint-config-next` declare an
-  ESLint 10 peer (until then, ESLint 10 forces `legacy-peer-deps` on install). See
-  [ESLint 10](#eslint-10).
-- **TypeScript** ≥ 5 (peer)
+- **ESLint 10.4+** (peer `eslint >=10.4`). The antfu foundation bundles `eslint-plugin-unicorn@68`,
+  which requires ESLint ≥ 10.4 — so this is a hard floor for a clean install (including pnpm/yarn and
+  npm `--strict-peer-deps`).
+- **Node** `^22.13 || >=24` (antfu's plugins require Node ≥ 22).
+- **TypeScript** ≥ 5 (peer).
+- **Prettier** — you install it; it owns formatting (this package ships the shared config, not Prettier
+  itself). See [Prettier](#prettier).
 
 ## Install
 
-Distributed via GitHub URL, pinned to a tag:
+Distributed via GitHub URL, pinned to a tag (no build step runs on install — raw ESM):
 
 ```bash
 npm i -D "github:zoldytech/eslint-config#v0.1.0"
 ```
 
-This adds `"@zoldytech/eslint-config": "github:zoldytech/eslint-config#v0.1.0"` to your
-`devDependencies`. No build step runs on install (raw ESM).
-
-> **Footprint note:** `eslint-config-next` is a regular dependency (so the `next` preset works
-> after you install only the `next` package). It is loaded lazily — importing the barrel does not
-> execute it — but it is still _installed_ for every consumer, including plain-JS/Nest projects that
-> never use the `next` preset. That's a deliberate simplicity trade; a future split into
-> per-framework packages is possible if the install weight matters.
-
 ## Usage
 
-Each preset is a function returning a flat-config array. Call it in your `eslint.config.mjs` and
-spread the result; append your own `globalIgnores` and any project overrides.
-
-### Next.js
+Each preset is a function that returns an antfu `FlatConfigComposer`. Use it as the **default
+export** of your `eslint.config.mjs` (no array spread needed) — pass project ignores and extra
+config blocks as options:
 
 ```js
+// eslint.config.mjs — Next.js
 import { next } from '@zoldytech/eslint-config/eslint';
-import { globalIgnores } from 'eslint/config';
 
-export default [...next({ typeChecked: true }), globalIgnores(['.next/**', 'coverage/**'])];
+export default next({
+  typeChecked: true,
+  ignores: ['.next/**', 'coverage/**'],
+});
 ```
 
-### NestJS
-
 ```js
+// NestJS (typeChecked defaults to true)
 import { nest } from '@zoldytech/eslint-config/eslint';
-import { globalIgnores } from 'eslint/config';
-
-export default [
-  ...nest(), // typeChecked defaults to true for Nest
-  globalIgnores(['dist/**']),
-];
+export default nest({ tsconfigPath: 'tsconfig.json' });
 ```
 
-### React + Vite
-
 ```js
+// React + Vite
 import { react } from '@zoldytech/eslint-config/eslint';
 export default react();
 ```
 
-### Plain JS/TS
-
 ```js
+// plain JS/TS
 import { base } from '@zoldytech/eslint-config/eslint';
 export default base();
 ```
 
-Subpath imports also work directly: `@zoldytech/eslint-config/eslint/next`, `/eslint/base`, etc.
+Subpaths also work directly: `@zoldytech/eslint-config/eslint/next`, `/eslint/base`, etc.
 
 ### Options
 
 Every preset accepts the same options (all optional):
 
-| Option            | Default                     | Purpose                                                                                          |
-| ----------------- | --------------------------- | ------------------------------------------------------------------------------------------------ |
-| `typeChecked`     | `false` (`true` for `nest`) | Enable type-aware linting (activates the ~68 type-checking sonarjs rules). Needs `tsconfigPath`. |
-| `tsconfigPath`    | `./tsconfig.eslint.json`    | tsconfig used for typed linting.                                                                 |
-| `tsconfigRootDir` | `process.cwd()`             | Root for resolving `tsconfigPath`. Pass `import.meta.dirname` for precision.                     |
-| `tsdoc`           | `false`                     | Enable the `tsdoc/syntax` gate on TS files.                                                      |
-| `reactVersion`    | _unset_ (auto-detect)       | Pin the React version (`react`/`next` only). Leave unset on ESLint 9. Required on ESLint 10.     |
-| `testGlobs`       | test/spec/config globs      | Override where a subset of sonarjs rules is relaxed.                                             |
-| `ignores`         | `[]`                        | Project ignore globs (flat-config `ignores`).                                                    |
-| `overrides`       | `[]`                        | Extra flat-config blocks, spread last so they win.                                               |
+| Option         | Default                     | Purpose                                                                                                |
+| -------------- | --------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `typeChecked`  | `false` (`true` for `nest`) | Enable antfu type-aware linting (activates the ~68 type-checking sonarjs rules). Needs `tsconfigPath`. |
+| `tsconfigPath` | `'tsconfig.json'`           | tsconfig for type-aware linting (resolved from where you run ESLint).                                  |
+| `tsdoc`        | `false`                     | Enable the `tsdoc/syntax` gate on TS files.                                                            |
+| `ignores`      | `[]`                        | Project ignore globs (forwarded to antfu).                                                             |
+| `testGlobs`    | test/spec/config globs      | Override where a subset of sonarjs rules is relaxed.                                                   |
+| `overrides`    | `[]`                        | Extra flat-config blocks, appended last so they win.                                                   |
+| `antfuOptions` | `{}`                        | Extra options merged straight into the underlying `antfu()` call.                                      |
 
-Type-aware linting needs a tsconfig that includes the files being linted (usually a
-`tsconfig.eslint.json` with a broader `include` than your build tsconfig, covering tests/e2e).
-With `typeChecked`, a `.ts` file _not_ covered by that tsconfig aborts the whole run with a
-`parserOptions.project` error — this is inherent to typescript-eslint's explicit-project mode, so
-make sure the tsconfig's `include`/`exclude` matches what ESLint lints.
-
-`tsdoc` is **opt-in** (`tsdoc: true`). Projects that previously enforced `tsdoc/syntax` on every
-file must pass it explicitly to keep that gate.
+Type-aware linting needs a tsconfig that includes the files being linted. A `.ts` file outside that
+tsconfig aborts the run with a `projectService` error — this is inherent to type-aware linting, so
+keep the tsconfig's `include`/`exclude` in sync with what ESLint lints.
 
 ## Prettier
 
-Point Prettier at the shared config in your `package.json`:
+Point Prettier at the shared config in `package.json`:
 
 ```json
 { "prettier": "@zoldytech/eslint-config/prettier" }
 ```
 
-ESLint owns code quality; Prettier owns formatting. The presets include `eslint-config-prettier`,
-so the two never fight.
+ESLint owns code quality; Prettier owns formatting. The presets set antfu `stylistic: false` and
+include `eslint-config-prettier`, so the two never fight.
 
 ## TypeScript
 
-Extend the matching base in your `tsconfig.json`:
+Extend the matching base in `tsconfig.json`:
 
 ```json
 {
   "extends": "@zoldytech/eslint-config/tsconfig/next.json",
   "compilerOptions": { "paths": { "@/*": ["./src/*"] } },
-  "include": ["src", "next-env.d.ts"]
+  "include": ["src"]
 }
 ```
 
-Available: `tsconfig/base.json`, `/react.json`, `/next.json`, `/nest.json` (the framework ones
-extend `base`).
+Available: `tsconfig/base.json`, `/react.json`, `/next.json`, `/nest.json` (framework ones extend base).
 
 ## Git hooks (recommended, not shipped)
 
-This package ships no hooks. The pipeline both reference projects use — wire it in your own repo:
+This package ships no hooks. Wire the recommended pipeline in your own repo:
 
 ```jsonc
 // package.json
@@ -146,29 +131,29 @@ This package ships no hooks. The pipeline both reference projects use — wire i
 npx lint-staged
 ```
 
-To baseline an existing project's violations without failing on them, use ESLint's native bulk
-suppressions: `eslint --suppress-all` writes `eslint-suppressions.json`, and CI runs
-`eslint . --pass-on-unpruned-suppressions` so only _new_ violations fail.
+To adopt this style in an existing project without failing on pre-existing issues, baseline them
+with ESLint's native bulk suppressions: `eslint --suppress-all` writes `eslint-suppressions.json`,
+and CI runs `eslint . --pass-on-unpruned-suppressions` so only _new_ violations fail.
 
-## ESLint 10
+## Notes
 
-This line targets **ESLint 9**. The rule logic itself runs on ESLint 10 in local testing, but two
-ecosystem gaps keep the published line on 9 for now: `eslint-plugin-react` and `eslint-config-next`
-don't yet declare an ESLint 10 peer (installing on 10 requires `legacy-peer-deps`), and
-`eslint-plugin-unicorn@71` — the ESLint-10 line — can't co-exist with the ESLint-9 line. A `v0.2.0`
-targeting ESLint 10 follows once those peers are updated.
-
-**When you do run on ESLint 10**, the `react`/`next` presets **require** `reactVersion` to be set
-(e.g. `next({ reactVersion: '19.0' })`) — eslint-plugin-react's version auto-detection calls a
-`context` API removed in ESLint 10 and will otherwise crash the run.
+- **Rule namespaces** follow antfu's short names: `ts/*` (typescript-eslint), `react/*`
+  (`@eslint-react`, which also provides `react/exhaustive-deps` / `react/rules-of-hooks`),
+  `import/*`, `unicorn/*`, `next/*` (`@next/eslint-plugin-next`). The `next` preset uses
+  `@next/eslint-plugin-next` directly (no `eslint-config-next`, no `next` package needed).
+- **`no-console`** bans all `console.*` (SonarQube S106), overriding antfu's `warn`/`error` allowance.
+- **First `eslint --fix` reorders imports** — antfu's `perfectionist` rules sort imports and named
+  members. Expect a one-time formatting diff when a project first adopts the style.
 
 ## Development
 
 ```bash
-npm install     # clean install, no flags needed on ESLint 9
+npm install     # clean install, no flags
 npm run lint    # dogfoods the base preset on this repo
 npm test        # E2E: each preset lints its fixture app (node --test)
 ```
+
+CI runs the suite on ESLint 10 across Node 22/24.
 
 ## License
 

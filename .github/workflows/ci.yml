@@ -15,7 +15,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: [20, 22, 24] # exercise the >=20.10 engines floor and current LTS/latest
+        node: [22, 24] # engines floor (22.13+) and latest
+    name: node ${{ matrix.node }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

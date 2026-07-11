@@ -1,14 +1,11 @@
 {
   "name": "@zoldytech/eslint-config",
+  "type": "module",
   "version": "0.1.0",
   "private": true,
-  "type": "module",
   "description": "Shared SonarQube-equivalent ESLint flat-config guardrails for Next.js, NestJS, React+Vite, and plain JS/TS.",
   "license": "MIT",
   "prettier": "./prettier/prettierrc.json",
-  "engines": {
-    "node": ">=20.10.0"
-  },
   "exports": {
     "./eslint": "./eslint/index.js",
     "./eslint/base": "./eslint/base.js",
@@ -27,38 +24,31 @@
     "prettier",
     "tsconfig"
   ],
+  "engines": {
+    "node": "^22.13.0 || >=24"
+  },
   "scripts": {
     "lint": "eslint .",
     "test": "node --test test/*.test.js",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
+  "peerDependencies": {
+    "eslint": ">=10.4",
+    "typescript": ">=5"
+  },
   "dependencies": {
-    "eslint-config-next": "^16.2.10",
+    "@antfu/eslint-config": "^9.1.0",
+    "@eslint-react/eslint-plugin": "^5.14.5",
+    "@next/eslint-plugin-next": "^16.2.10",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-import-x": "^4.17.1",
-    "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.3",
     "eslint-plugin-sonarjs": "4.1.0",
-    "eslint-plugin-tsdoc": "^0.5.2",
-    "eslint-plugin-unicorn": "^65.0.1",
-    "eslint-plugin-unused-imports": "^4.4.1",
-    "typescript-eslint": "^8.63.0"
-  },
-  "peerDependencies": {
-    "eslint": ">=9.38",
-    "next": "*",
-    "typescript": ">=5"
-  },
-  "peerDependenciesMeta": {
-    "next": {
-      "optional": true
-    }
+    "eslint-plugin-tsdoc": "^0.5.2"
   },
   "devDependencies": {
-    "eslint": "^9.39.0",
-    "next": "^16.2.10",
+    "eslint": "^10.7.0",
     "prettier": "^3.8.1",
     "typescript": "^5.9.3"
   }

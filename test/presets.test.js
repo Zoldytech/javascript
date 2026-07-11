@@ -3,9 +3,9 @@
 // Fidelity: each fixture has its own eslint.config.mjs importing the preset the
 // way a consumer would, and we lint with cwd set to that fixture directory.
 
-import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import path from 'node:path';
+import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { ESLint } from 'eslint';
 
@@ -48,19 +48,16 @@ function presetSuite(preset, cleanFile, dirtyFile, expectedRules) {
 presetSuite('plain', 'clean.ts', 'dirty.ts', [
   'no-console',
   'unused-imports/no-unused-imports',
-  'import-x/no-duplicates',
+  'import/no-duplicates',
   'sonarjs/cognitive-complexity', // the headline SonarQube guardrail
 ]);
 
-presetSuite('react-vite', 'clean.tsx', 'dirty.tsx', ['no-console', 'react-hooks/exhaustive-deps']);
+presetSuite('react-vite', 'clean.tsx', 'dirty.tsx', ['no-console', 'react/exhaustive-deps']);
 
 presetSuite('next', 'clean.tsx', 'dirty.tsx', [
   'no-console',
-  'react-hooks/exhaustive-deps',
-  '@next/next/no-img-element', // the Next-specific layer
+  'react/exhaustive-deps',
+  'next/no-img-element', // the Next layer (antfu renames @next/next -> next)
 ]);
 
-presetSuite('nest', 'clean.ts', 'dirty.ts', [
-  'no-console',
-  '@typescript-eslint/no-floating-promises',
-]);
+presetSuite('nest', 'clean.ts', 'dirty.ts', ['no-console', 'ts/no-floating-promises']);

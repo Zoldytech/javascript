@@ -1,49 +1,54 @@
-// base — framework-agnostic SonarQube-equivalent guardrail for plain JS/TS.
-// The React/Next/Nest presets compose this core and layer their framework
-// rules on top.
+// base — general-purpose house style for plain JS/TS, built on @antfu/eslint-config
+// with the SonarQube-compatibility layer on top. Prettier owns formatting
+// (stylistic: false + eslint-config-prettier).
 
+import antfu from '@antfu/eslint-config';
 import prettier from 'eslint-config-prettier/flat';
-import { tsLanguageBlock, guardrailGate, sonarjsTestOff, tsdocBlock } from './_shared.js';
+import { antfuTypescript, sonarLayer, sonarTestOff } from './_shared.js';
 
 /**
  * @typedef {object} BaseOptions
- * @property {boolean} [typeChecked=false] Enable type-aware linting (activates the
- *   ~68 sonarjs rules that require the TypeScript type checker). Needs `tsconfigPath`.
- * @property {string} [tsconfigPath='./tsconfig.eslint.json'] tsconfig used for typed linting.
- * @property {string} [tsconfigRootDir=process.cwd()] Root for resolving `tsconfigPath`.
+ * @property {boolean} [typeChecked=false] Enable antfu's type-aware linting (activates the
+ *   ~68 sonarjs rules that need the TypeScript type checker). Requires `tsconfigPath`.
+ * @property {string} [tsconfigPath='tsconfig.json'] tsconfig used for type-aware linting.
  * @property {boolean} [tsdoc=false] Enable the `tsdoc/syntax` gate on TS files.
- * @property {string[]} [testGlobs] Override the tests/fixtures/config globs where a
- *   subset of sonarjs rules is disabled.
- * @property {string[]} [ignores=[]] Project-specific ignore globs (flat-config `ignores`).
- * @property {import('eslint').Linter.Config[]} [overrides=[]] Extra flat-config blocks,
- *   spread last so they win.
+ * @property {'app'|'lib'} [type='app'] antfu project type.
+ * @property {string[]} [ignores=[]] Project-specific ignore globs (forwarded to antfu).
+ * @property {string[]} [testGlobs] Override the tests/config globs for the sonarjs-off block.
+ * @property {import('eslint').Linter.Config[]} [overrides=[]] Extra flat-config blocks, appended last.
+ * @property {Record<string, unknown>} [antfuOptions] Extra options merged into the antfu() call.
  */
 
 /**
- * Framework-agnostic guardrail preset.
+ * General-purpose guardrail preset. Returns antfu's FlatConfigComposer (thenable) —
+ * use as `export default base({ ... })` (no spread needed).
  * @param {BaseOptions} [options]
- * @returns {import('eslint').Linter.Config[]}
  */
 export function base(options = {}) {
   const {
     typeChecked = false,
     tsconfigPath,
-    tsconfigRootDir,
     tsdoc = false,
-    testGlobs,
+    type = 'app',
     ignores = [],
+    testGlobs,
     overrides = [],
+    antfuOptions = {},
   } = options;
 
-  return [
-    tsLanguageBlock({ typeChecked, tsconfigPath, tsconfigRootDir }),
+  return antfu(
+    {
+      type,
+      typescript: antfuTypescript({ typeChecked, tsconfigPath }),
+      stylistic: false, // Prettier owns formatting
+      ignores,
+      ...antfuOptions,
+    },
+    ...sonarLayer({ tsdoc }),
+    sonarTestOff(testGlobs),
     prettier,
-    guardrailGate(),
-    ...(tsdoc ? [tsdocBlock()] : []),
-    sonarjsTestOff(testGlobs),
-    ...(ignores.length > 0 ? [{ ignores }] : []),
-    ...overrides,
-  ];
+    ...overrides
+  );
 }
 
 export default base;
