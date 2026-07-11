@@ -1,0 +1,65 @@
+{
+  "name": "@zoldytech/eslint-config",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Shared SonarQube-equivalent ESLint flat-config guardrails for Next.js, NestJS, React+Vite, and plain JS/TS.",
+  "license": "MIT",
+  "prettier": "./prettier/prettierrc.json",
+  "engines": {
+    "node": ">=20.10.0"
+  },
+  "exports": {
+    "./eslint": "./eslint/index.js",
+    "./eslint/base": "./eslint/base.js",
+    "./eslint/react": "./eslint/react.js",
+    "./eslint/next": "./eslint/next.js",
+    "./eslint/nest": "./eslint/nest.js",
+    "./prettier": "./prettier/prettierrc.json",
+    "./tsconfig/base.json": "./tsconfig/base.json",
+    "./tsconfig/react.json": "./tsconfig/react.json",
+    "./tsconfig/next.json": "./tsconfig/next.json",
+    "./tsconfig/nest.json": "./tsconfig/nest.json",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "eslint",
+    "prettier",
+    "tsconfig"
+  ],
+  "scripts": {
+    "lint": "eslint .",
+    "test": "node --test test/*.test.js",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "dependencies": {
+    "eslint-config-next": "^16.2.10",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-import-x": "^4.17.1",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.3",
+    "eslint-plugin-sonarjs": "4.1.0",
+    "eslint-plugin-tsdoc": "^0.5.2",
+    "eslint-plugin-unicorn": "^65.0.1",
+    "eslint-plugin-unused-imports": "^4.4.1",
+    "typescript-eslint": "^8.63.0"
+  },
+  "peerDependencies": {
+    "eslint": ">=9.38",
+    "next": "*",
+    "typescript": ">=5"
+  },
+  "peerDependenciesMeta": {
+    "next": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "eslint": "^9.39.0",
+    "next": "^16.2.10",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  }
+}

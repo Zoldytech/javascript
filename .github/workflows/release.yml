@@ -1,0 +1,30 @@
+# DORMANT until Phase 2 (npm publish). Phase 1 distributes via GitHub URL + git
+# tags, so this workflow is disabled by the `if: false` guard below. To go live:
+#   1. Create the `zoldytech` npm org and enable OIDC trusted publishing for this repo.
+#   2. Remove `"private": true` from package.json and uncomment `publishConfig`.
+#   3. Delete the `if: false` line.
+# Publishing is then gated on pushing a `v*` git tag whose version matches package.json.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  publish:
+    if: false # DORMANT — see header
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # npm provenance (OIDC), no long-lived NPM_TOKEN
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          registry-url: https://registry.npmjs.org
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm publish --provenance --access public
