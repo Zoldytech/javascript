@@ -29,7 +29,7 @@ Sonar issues before they reach CI. Five stack presets — **plain JS/TS**, **Rea
 Distributed via GitHub URL, pinned to a tag (no build step runs on install — raw ESM):
 
 ```bash
-npm i -D "github:zoldytech/javascript#0.1.1"
+npm i -D "github:zoldytech/javascript#0.1.2"
 ```
 
 ## Usage
@@ -117,6 +117,19 @@ Extend the matching base in `tsconfig.json`:
 
 Available: `tsconfig/base.json`, `/react.json`, `/react-native.json`, `/next.json`, `/nest.json`
 (framework ones extend base).
+
+The base goes beyond `strict`. Most notably it sets **`noUncheckedIndexedAccess`**, which `strict`
+does _not_ enable: it makes `arr[i]` and `record[key]` honestly `T | undefined`. Without it,
+TypeScript types this as non-nullable and the bug ships:
+
+```ts
+const [row] = await db.insert(project).values(input).returning({ id: project.id });
+return row.id; // `row` is `T | undefined` at runtime; without the flag TS says it is always `T`
+```
+
+Expect to add real guards when you first adopt it — that is the flag doing its job. Also on:
+`noUnusedLocals`, `noUnusedParameters`, `noImplicitReturns`, `noFallthroughCasesInSwitch`,
+`verbatimModuleSyntax`, `isolatedModules`, `forceConsistentCasingInFileNames`.
 
 ## Git hooks (recommended, not shipped)
 
