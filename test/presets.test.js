@@ -52,6 +52,16 @@ presetSuite('plain', 'clean.ts', 'dirty.ts', [
   'sonarjs/cognitive-complexity', // the headline SonarQube guardrail
 ]);
 
+test('plain: uppercase test titles do not trip test/prefer-lowercase-title', async () => {
+  const result = await lintFixture('plain', 'titles.test.ts');
+  const lowercase = result.messages.filter((m) => m.ruleId === 'test/prefer-lowercase-title');
+  assert.equal(
+    lowercase.length,
+    0,
+    `acronyms/proper nouns in test titles must survive; got:\n${detail(result)}`
+  );
+});
+
 presetSuite('react-vite', 'clean.tsx', 'dirty.tsx', ['no-console', 'react/exhaustive-deps']);
 
 presetSuite('react-native', 'clean.tsx', 'dirty.tsx', ['no-console', 'react/exhaustive-deps']);

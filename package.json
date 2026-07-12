@@ -1,7 +1,7 @@
 {
   "name": "@zoldytech/javascript",
   "type": "module",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": true,
   "description": "Zoldytech's JavaScript/TypeScript standards: SonarQube-compatible ESLint presets (Next.js, NestJS, React+Vite, plain JS/TS) plus shared Prettier and tsconfig configs.",
   "license": "MIT",

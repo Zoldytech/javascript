@@ -103,15 +103,23 @@ export function sonarReactRules() {
 }
 
 /**
- * sonarjs rules that are noise in tests/fixtures/config files.
+ * Rules that are noise in tests/fixtures/config files — the sonarjs subset plus one antfu rule.
+ *
+ * `test/prefer-lowercase-title` (antfu's default) lowercases the FIRST CHARACTER of every
+ * `describe`/`it` title, and its autofix does so silently: `POST` becomes `pOST`, `RLS` becomes
+ * `rLS`, `Clerk` becomes `clerk`. Test titles are descriptive sentences that legitimately open with
+ * acronyms and proper nouns, and no option to the rule preserves them (only `allowedPrefixes`, which
+ * would have to enumerate every acronym anyone might ever start a title with). The rule buys trivial
+ * consistency at the cost of corrupting meaning, so it is off.
  * @param {string[]} [testGlobs]
- * @returns {import('eslint').Linter.Config} the tests/config sonarjs-off block.
+ * @returns {import('eslint').Linter.Config} the tests/config rule-off block.
  */
 export function sonarTestOff(testGlobs = DEFAULT_TEST_GLOBS) {
   return {
-    name: 'zoldytech/sonar-test-off',
+    name: 'zoldytech/test-file-overrides',
     files: testGlobs,
     rules: {
+      'test/prefer-lowercase-title': 'off',
       'sonarjs/prefer-specific-assertions': 'off',
       'sonarjs/no-floating-point-equality': 'off',
       'sonarjs/no-hardcoded-passwords': 'off',
