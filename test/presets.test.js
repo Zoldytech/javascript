@@ -54,6 +54,16 @@ presetSuite('plain', 'clean.ts', 'dirty.ts', [
 
 presetSuite('react-vite', 'clean.tsx', 'dirty.tsx', ['no-console', 'react/exhaustive-deps']);
 
+presetSuite('react-native', 'clean.tsx', 'dirty.tsx', ['no-console', 'react/exhaustive-deps']);
+
+// The RN globals block is the preset's differentiator over `react`; guard it in a
+// .js file where no-undef is active (it's off in .tsx, so clean.tsx can't).
+test('react-native: __DEV__ RN global does not trip no-undef', async () => {
+  const result = await lintFixture('react-native', 'dev-global.js');
+  const undef = result.messages.filter((m) => m.ruleId === 'no-undef');
+  assert.equal(undef.length, 0, `expected __DEV__ declared as a global, got:\n${detail(result)}`);
+});
+
 presetSuite('next', 'clean.tsx', 'dirty.tsx', [
   'no-console',
   'react/exhaustive-deps',
