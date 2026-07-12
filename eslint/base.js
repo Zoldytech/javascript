@@ -4,7 +4,7 @@
 
 import antfu from '@antfu/eslint-config';
 import prettier from 'eslint-config-prettier/flat';
-import { antfuTypescript, sonarLayer, sonarTestOff } from './_shared.js';
+import { antfuTypescript, declarationFileOverrides, sonarLayer, sonarTestOff } from './_shared.js';
 
 /**
  * @typedef {object} BaseOptions
@@ -47,6 +47,7 @@ export function base(options = {}) {
     ...sonarLayer({ tsdoc }),
     sonarTestOff(testGlobs),
     prettier,
+    declarationFileOverrides(),
     ...overrides
   );
 }

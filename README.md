@@ -29,7 +29,7 @@ Sonar issues before they reach CI. Five stack presets — **plain JS/TS**, **Rea
 Distributed via GitHub URL, pinned to a tag (no build step runs on install — raw ESM):
 
 ```bash
-npm i -D "github:zoldytech/javascript#v0.1.0"
+npm i -D "github:zoldytech/javascript#0.1.1"
 ```
 
 ## Usage

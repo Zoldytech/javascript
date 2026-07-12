@@ -6,7 +6,13 @@
 import antfu from '@antfu/eslint-config';
 import nextPlugin from '@next/eslint-plugin-next';
 import prettier from 'eslint-config-prettier/flat';
-import { antfuTypescript, sonarLayer, sonarReactRules, sonarTestOff } from './_shared.js';
+import {
+  antfuTypescript,
+  declarationFileOverrides,
+  sonarLayer,
+  sonarReactRules,
+  sonarTestOff,
+} from './_shared.js';
 
 /**
  * Flat-config block registering @next/eslint-plugin-next with its core-web-vitals
@@ -61,6 +67,7 @@ export function next(options = {}) {
     sonarReactRules(),
     sonarTestOff(testGlobs),
     prettier,
+    declarationFileOverrides(),
     ...overrides
   );
 }

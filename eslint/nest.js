@@ -4,7 +4,13 @@
 
 import antfu from '@antfu/eslint-config';
 import prettier from 'eslint-config-prettier/flat';
-import { antfuTypescript, sonarLayer, sonarTestOff, TS_GLOBS } from './_shared.js';
+import {
+  antfuTypescript,
+  declarationFileOverrides,
+  sonarLayer,
+  sonarTestOff,
+  TS_GLOBS,
+} from './_shared.js';
 
 /**
  * @typedef {object} NestOptions
@@ -69,6 +75,7 @@ export function nest(options = {}) {
     ...nestRules,
     sonarTestOff(testGlobs),
     prettier,
+    declarationFileOverrides(),
     ...overrides
   );
 }

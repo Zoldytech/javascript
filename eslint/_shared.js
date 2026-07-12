@@ -140,3 +140,23 @@ export function sonarTestOff(testGlobs = DEFAULT_TEST_GLOBS) {
 export function antfuTypescript({ typeChecked = false, tsconfigPath = 'tsconfig.json' } = {}) {
   return typeChecked ? { tsconfigPath } : true;
 }
+
+/**
+ * Declaration-file (.d.ts) overrides. A `.d.ts` can only carry ambient `declare var` for
+ * `globalThis` augmentation — TypeScript does NOT merge `const`/`let` into `typeof globalThis`,
+ * and an `interface Window` augmentation types `window.X`, not `globalThis.X` (which
+ * unicorn/prefer-global-this steers code toward). So `no-var`/`vars-on-top` can only ever
+ * false-positive on ambient declarations; turn them off for `.d.ts`. Appended last in each
+ * preset so it wins over antfu/sonar, before the consumer's own `overrides`.
+ * @returns {import('eslint').Linter.Config} the `.d.ts` override block (no-var/vars-on-top off).
+ */
+export function declarationFileOverrides() {
+  return {
+    name: 'zoldytech/declaration-files',
+    files: ['**/*.d.ts'],
+    rules: {
+      'no-var': 'off',
+      'vars-on-top': 'off',
+    },
+  };
+}

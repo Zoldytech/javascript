@@ -49,6 +49,7 @@ with no extra ESLint config:
   **Native-only** projects (no web target) can drop the DOM lib to catch
   accidental DOM usage on native, by overriding `lib` in their own tsconfig:
   `"compilerOptions": { "lib": ["ES2022"] }`.
+
 - The bundler alias (`react-native$` → `react-native-web`) is a build-tool concern
   (webpack/Metro/Vite), out of scope for this package.
 
@@ -63,11 +64,11 @@ which this package requires (peer `eslint >=10.4`).
 
 **Verified against ESLint 10.7 (2026-07):**
 
-| Rule | Status on ESLint 10 |
-| --- | --- |
+| Rule                                                                       | Status on ESLint 10                                               |
+| -------------------------------------------------------------------------- | ----------------------------------------------------------------- |
 | `no-unused-styles`, `no-inline-styles`, `no-color-literals`, `sort-styles` | **crash** — call `context.getSourceCode()` (removed in ESLint 10) |
-| `split-platform-components` | **crash** — calls `context.getFilename()` (removed in ESLint 10) |
-| `no-raw-text`, `no-single-element-style-arrays` | load but are the least useful rules |
+| `split-platform-components`                                                | **crash** — calls `context.getFilename()` (removed in ESLint 10)  |
+| `no-raw-text`, `no-single-element-style-arrays`                            | load but are the least useful rules                               |
 
 `eslint-plugin-react-native@5.0.0` is the latest release and declares peer
 `eslint ^3 … ^9`. `@react-native/eslint-plugin` ships no style rules
@@ -114,6 +115,7 @@ When `eslint-plugin-react-native` publishes an ESLint-10-compatible release (dro
    ```
 
    (Omit `sort-styles` — pure ordering, Prettier's domain.)
+
 3. Add a `dirty.tsx` case to `test/fixtures/react-native/` that trips a couple of
    the style rules and extend the `presetSuite('react-native', …)` expected-rules
    list in `test/presets.test.js` accordingly.

@@ -15,7 +15,13 @@
 
 import antfu from '@antfu/eslint-config';
 import prettier from 'eslint-config-prettier/flat';
-import { antfuTypescript, sonarLayer, sonarReactRules, sonarTestOff } from './_shared.js';
+import {
+  antfuTypescript,
+  declarationFileOverrides,
+  sonarLayer,
+  sonarReactRules,
+  sonarTestOff,
+} from './_shared.js';
 
 /**
  * RN runtime globals that antfu's browser+node globals don't already cover.
@@ -74,6 +80,7 @@ export function reactNative(options = {}) {
     sonarReactRules(),
     sonarTestOff(testGlobs),
     prettier,
+    declarationFileOverrides(),
     ...overrides
   );
 }

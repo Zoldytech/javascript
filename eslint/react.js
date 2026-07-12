@@ -4,7 +4,13 @@
 
 import antfu from '@antfu/eslint-config';
 import prettier from 'eslint-config-prettier/flat';
-import { antfuTypescript, sonarLayer, sonarReactRules, sonarTestOff } from './_shared.js';
+import {
+  antfuTypescript,
+  declarationFileOverrides,
+  sonarLayer,
+  sonarReactRules,
+  sonarTestOff,
+} from './_shared.js';
 
 /**
  * @typedef {object} ReactOptions
@@ -45,6 +51,7 @@ export function react(options = {}) {
     sonarReactRules(),
     sonarTestOff(testGlobs),
     prettier,
+    declarationFileOverrides(),
     ...overrides
   );
 }
