@@ -3,8 +3,9 @@
 // already enables exhaustive-deps / rules-of-hooks / Fast-Refresh checks) plus
 // the SonarQube-compatibility layer. React Native ships no SonarQube-specific
 // rules — it is just React + TS/JS — so the `react` guardrails apply verbatim;
-// this preset adds the RN runtime globals (`__DEV__`, Hermes) so they don't trip
-// `no-undef`, and a matching `tsconfig/react-native.json` (no DOM lib).
+// this preset adds the RN runtime globals (`__DEV__`, `HermesInternal`) so they
+// don't trip `no-undef`, and a matching `tsconfig/react-native.json` (which keeps
+// the DOM lib so react-native-web's web target type-checks — see docs).
 //
 // NOTE: the RN-specific style rules (no-inline-styles, no-color-literals,
 // no-unused-styles, split-platform-components, …) are intentionally NOT wired in
