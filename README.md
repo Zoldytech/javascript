@@ -2,8 +2,8 @@
 
 A general-purpose ESLint **house style**, built on [`@antfu/eslint-config`](https://github.com/antfu/eslint-config)
 and made **SonarQube-compatible**: local ESLint mirrors what the SonarQube gate flags, so you fix
-Sonar issues before they reach CI. Four stack presets — **plain JS/TS**, **React + Vite**,
-**Next.js**, **NestJS**.
+Sonar issues before they reach CI. Five stack presets — **plain JS/TS**, **React + Vite**,
+**React Native**, **Next.js**, **NestJS**.
 
 - **antfu foundation** — TypeScript, imports, `unicorn`, node, `jsonc`/`yaml`/`markdown`, sensible
   modern defaults, one `--fix`.
@@ -61,6 +61,12 @@ export default react();
 ```
 
 ```js
+// React Native
+import { reactNative } from '@zoldytech/javascript/eslint';
+export default reactNative();
+```
+
+```js
 // plain JS/TS
 import { base } from '@zoldytech/javascript/eslint';
 export default base();
@@ -109,7 +115,8 @@ Extend the matching base in `tsconfig.json`:
 }
 ```
 
-Available: `tsconfig/base.json`, `/react.json`, `/next.json`, `/nest.json` (framework ones extend base).
+Available: `tsconfig/base.json`, `/react.json`, `/react-native.json`, `/next.json`, `/nest.json`
+(framework ones extend base).
 
 ## Git hooks (recommended, not shipped)
 
@@ -144,6 +151,13 @@ and CI runs `eslint . --pass-on-unpruned-suppressions` so only _new_ violations 
 - **`no-console`** bans all `console.*` (SonarQube S106), overriding antfu's `warn`/`error` allowance.
 - **First `eslint --fix` reorders imports** — antfu's `perfectionist` rules sort imports and named
   members. Expect a one-time formatting diff when a project first adopts the style.
+- **React Native** — `reactNative` gives full SonarQube/React parity plus the RN runtime globals
+  (`__DEV__`, Hermes), and works for **react-native-web** universal codebases with no extra config
+  (its `tsconfig/react-native.json` keeps the DOM lib for the web target). The RN-idiom style rules
+  (`no-inline-styles`, `no-color-literals`, …) are deferred: their only source,
+  `eslint-plugin-react-native`, crashes on ESLint 10. See
+  [docs/react-native.md](docs/react-native.md) for the react-native-web notes and the tracked
+  upgrade path.
 
 ## Development
 
