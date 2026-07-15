@@ -1,9 +1,8 @@
-# DORMANT until Phase 2 (npm publish). Phase 1 distributes via GitHub URL + git
-# tags, so this workflow is disabled by the `if: false` guard below. To go live:
-#   1. Create the `zoldytech` npm org and enable OIDC trusted publishing for this repo.
-#   2. Remove `"private": true` from package.json and uncomment `publishConfig`.
-#   3. Delete the `if: false` line.
-# Publishing is then gated on pushing a `v*` git tag whose version matches package.json.
+# Publishing is gated on pushing a `v*` git tag whose version matches package.json.
+# Requires OIDC trusted publishing to be enabled for this repo on the @zoldytech npm org
+# (npmjs.com -> package settings -> Trusted Publisher -> GitHub Actions -> Zoldytech/javascript ->
+# release.yml). The GitHub Release is only created after npm publish succeeds, so a failed
+# publish can never leave behind a release/tag with no matching npm version.
 name: Release
 
 on:
@@ -12,10 +11,9 @@ on:
 
 jobs:
   publish:
-    if: false # DORMANT — see header
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write # create the GitHub Release
       id-token: write # npm provenance (OIDC), no long-lived NPM_TOKEN
     steps:
       - uses: actions/checkout@v4
@@ -28,3 +26,6 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npm publish --provenance --access public
+      - run: gh release create "${{ github.ref_name }}" --generate-notes
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
