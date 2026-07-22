@@ -1,5 +1,9 @@
 # @zoldytech/javascript
 
+[![npm version](https://img.shields.io/npm/v/@zoldytech/javascript.svg)](https://npmjs.com/package/@zoldytech/javascript)
+[![npm downloads](https://img.shields.io/npm/dm/@zoldytech/javascript.svg)](https://npmjs.com/package/@zoldytech/javascript)
+[![CI](https://img.shields.io/github/actions/workflow/status/Zoldytech/javascript/ci.yml?branch=main)](https://github.com/Zoldytech/javascript/actions/workflows/ci.yml)
+
 A general-purpose ESLint **house style**, built on [`@antfu/eslint-config`](https://github.com/antfu/eslint-config)
 and made **SonarQube-compatible**: local ESLint mirrors what the SonarQube gate flags, so you fix
 Sonar issues before they reach CI. Five stack presets — **plain JS/TS**, **React + Vite**,
@@ -26,10 +30,8 @@ Sonar issues before they reach CI. Five stack presets — **plain JS/TS**, **Rea
 
 ## Install
 
-Distributed via GitHub URL, pinned to a tag (no build step runs on install — raw ESM):
-
 ```bash
-npm i -D "github:zoldytech/javascript#0.1.2"
+npm i -D @zoldytech/javascript
 ```
 
 ## Usage
