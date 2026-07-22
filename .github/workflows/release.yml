@@ -1,8 +1,13 @@
-# Publishing is gated on pushing a `v*` git tag whose version matches package.json.
-# Requires OIDC trusted publishing to be enabled for this repo on the @zoldytech npm org
-# (npmjs.com -> package settings -> Trusted Publisher -> GitHub Actions -> Zoldytech/javascript ->
-# release.yml). The GitHub Release is only created after npm publish succeeds, so a failed
-# publish can never leave behind a release/tag with no matching npm version.
+# Publishing is gated on pushing a `v*` git tag whose version matches package.json (verified in
+# the `publish` job below — a mismatch fails the job). Requires OIDC trusted publishing to be
+# enabled for this repo on the @zoldytech npm org (npmjs.com -> package settings -> Trusted
+# Publisher -> GitHub Actions -> Zoldytech/javascript -> release.yml).
+#
+# Publish and release-creation are separate jobs, each with least-privilege permissions. The tag
+# itself already exists once pushed (that's what triggers this workflow) regardless of outcome,
+# but the GitHub Release is only created after `publish` succeeds — and lives in its own job so it
+# can be re-run on its own if it fails, without re-attempting `npm publish` (which would fail once
+# the version is already on the registry).
 name: Release
 
 on:
@@ -13,7 +18,7 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # create the GitHub Release
+      contents: read
       id-token: write # npm provenance (OIDC), no long-lived NPM_TOKEN
     steps:
       - uses: actions/checkout@v4
@@ -23,9 +28,24 @@ jobs:
           cache: npm
           registry-url: https://registry.npmjs.org
       - run: npm ci
+      - name: Verify tag matches package.json version
+        run: |
+          PKG_VERSION="v$(node -p "require('./package.json').version")"
+          if [ "$PKG_VERSION" != "${{ github.ref_name }}" ]; then
+            echo "::error::Tag ${{ github.ref_name }} does not match package.json version ($PKG_VERSION)"
+            exit 1
+          fi
       - run: npm run lint
       - run: npm test
       - run: npm publish --provenance --access public
+
+  release:
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # create the GitHub Release
+    steps:
+      - uses: actions/checkout@v4
       - run: gh release create "${{ github.ref_name }}" --generate-notes
         env:
           GITHUB_TOKEN: ${{ github.token }}
