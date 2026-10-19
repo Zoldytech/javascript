@@ -1,21 +1,58 @@
-# Publishing is gated on pushing a `v*` git tag whose version matches package.json (verified in
-# the `publish` job below — a mismatch fails the job). Requires OIDC trusted publishing to be
+# Publishing happens automatically when a merge to `main` changes package.json to a version that has
+# no `v<version>` tag yet. Pushing a matching `v*` tag by hand also works (the `check` job verifies
+# the tag matches package.json — a mismatch fails the run). Requires OIDC trusted publishing to be
 # enabled for this repo on the @zoldytech npm org (npmjs.com -> package settings -> Trusted
 # Publisher -> GitHub Actions -> Zoldytech/javascript -> release.yml).
 #
-# Publish and release-creation are separate jobs, each with least-privilege permissions. The tag
-# itself already exists once pushed (that's what triggers this workflow) regardless of outcome,
-# but the GitHub Release is only created after `publish` succeeds — and lives in its own job so it
-# can be re-run on its own if it fails, without re-attempting `npm publish` (which would fail once
-# the version is already on the registry).
+# Publish and release-creation are separate jobs, each with least-privilege permissions. The GitHub
+# Release (and, on the `main` path, the tag itself) is only created after `publish` succeeds — and
+# lives in its own job so it can be re-run on its own if it fails. Both jobs skip work that is
+# already done (version already on npm, release already exists), so any re-run is safe. A tag
+# created here with GITHUB_TOKEN does not re-trigger this workflow.
 name: Release
 
 on:
   push:
+    branches: [main]
+    paths: [package.json, .github/workflows/release.yml]
     tags: ['v*']
+  workflow_dispatch:
+
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
+      should_release: ${{ steps.version.outputs.should_release }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: version
+        name: Resolve version and decide whether to release
+        run: |
+          TAG="v$(node -p "require('./package.json').version")"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            if [ "$TAG" != "${{ github.ref_name }}" ]; then
+              echo "::error::Tag ${{ github.ref_name }} does not match package.json version ($TAG)"
+              exit 1
+            fi
+            echo "should_release=true" >> "$GITHUB_OUTPUT"
+          elif git ls-remote --exit-code --tags origin "refs/tags/$TAG" > /dev/null; then
+            echo "$TAG already tagged, nothing to release"
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_release=true" >> "$GITHUB_OUTPUT"
+          fi
+
   publish:
+    needs: check
+    if: needs.check.outputs.should_release == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -28,24 +65,31 @@ jobs:
           cache: npm
           registry-url: https://registry.npmjs.org
       - run: npm ci
-      - name: Verify tag matches package.json version
-        run: |
-          PKG_VERSION="v$(node -p "require('./package.json').version")"
-          if [ "$PKG_VERSION" != "${{ github.ref_name }}" ]; then
-            echo "::error::Tag ${{ github.ref_name }} does not match package.json version ($PKG_VERSION)"
-            exit 1
-          fi
       - run: npm run lint
       - run: npm test
-      - run: npm publish --provenance --access public
+      - name: Publish to npm (skipped if this version is already published)
+        run: |
+          NAME_AT_VERSION="$(node -p "const p = require('./package.json'); p.name + '@' + p.version")"
+          if npm view "$NAME_AT_VERSION" version > /dev/null 2>&1; then
+            echo "$NAME_AT_VERSION is already on npm, skipping publish"
+          else
+            npm publish --provenance --access public
+          fi
 
   release:
-    needs: publish
+    needs: [check, publish]
     runs-on: ubuntu-latest
     permissions:
-      contents: write # create the GitHub Release
+      contents: write # create the tag and GitHub Release
     steps:
       - uses: actions/checkout@v4
-      - run: gh release create "${{ github.ref_name }}" --generate-notes
+      - name: Create GitHub Release (skipped if it already exists)
+        run: |
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            echo "Release $TAG already exists, skipping"
+          else
+            gh release create "$TAG" --target "$GITHUB_SHA" --generate-notes
+          fi
         env:
+          TAG: ${{ needs.check.outputs.tag }}
           GITHUB_TOKEN: ${{ github.token }}
