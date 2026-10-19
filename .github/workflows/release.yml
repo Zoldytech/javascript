@@ -31,7 +31,7 @@ jobs:
       tag: ${{ steps.version.outputs.tag }}
       should_release: ${{ steps.version.outputs.should_release }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - id: version
         name: Resolve version and decide whether to release
         run: |
@@ -58,11 +58,12 @@ jobs:
       contents: read
       id-token: write # npm provenance (OIDC), no long-lived NPM_TOKEN
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
-          cache: npm
+          # No dependency cache in the publish job: a poisoned cache could reach the OIDC token.
+          package-manager-cache: false
           registry-url: https://registry.npmjs.org
       - run: npm ci
       - run: npm run lint
@@ -82,7 +83,7 @@ jobs:
     permissions:
       contents: write # create the tag and GitHub Release
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Create GitHub Release (skipped if it already exists)
         run: |
           if gh release view "$TAG" > /dev/null 2>&1; then
